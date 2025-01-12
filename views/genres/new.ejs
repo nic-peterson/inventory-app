@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add New Genre - Bookstore Inventory</title>
+    <link rel="stylesheet" href="/css/tailwind.css" />
+  </head>
+  <body class="bg-secondary text-gray-900">
+    <%- include('../partials/header') %> <%- include('../partials/nav') %>
+
+    <main class="p-4 max-w-4xl mx-auto">
+      <div class="bg-white shadow-md rounded-lg p-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold text-primary">Add New Genre</h1>
+        </div>
+
+        <form id="newGenreForm" class="space-y-6">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="space-y-4">
+              <div>
+                <label for="name" class="block text-gray-600 mb-1">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label for="description" class="block text-gray-600 mb-1"
+                  >Description</label
+                >
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="6"
+                  class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex justify-end space-x-2">
+            <a
+              href="/genres"
+              class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            >
+              Create Genre
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      document
+        .getElementById("newGenreForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          // Get form data
+          const formData = new FormData(e.target);
+
+          // Create request body
+          const data = {
+            name: formData.get("name"),
+            description: formData.get("description"),
+          };
+
+          try {
+            const response = await fetch("/genres", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+              window.location.href = "/genres";
+            } else {
+              const error = await response.json();
+              alert(error.message || "Failed to create genre");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to create genre");
+          }
+        });
+    </script>
+  </body>
+</html>
