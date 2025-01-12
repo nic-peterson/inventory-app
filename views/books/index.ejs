@@ -48,7 +48,7 @@
             <th class="p-3 text-center">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="booksTableBody">
           <% books.forEach(book => { %>
           <tr class="border-t">
             <td class="p-3"><%= book.title %></td>
@@ -103,6 +103,28 @@
           }
         }
       }
+
+      // Add search functionality
+      const searchInput = document.getElementById("searchInput");
+      const tableBody = document.getElementById("booksTableBody");
+      const rows = tableBody.getElementsByTagName("tr");
+
+      searchInput.addEventListener("input", function () {
+        const searchTerm = this.value.toLowerCase();
+
+        Array.from(rows).forEach((row) => {
+          const title = row.cells[0].textContent.toLowerCase();
+          const authors = row.cells[1].textContent.toLowerCase();
+          const genre = row.cells[2].textContent.toLowerCase();
+
+          const matches =
+            title.includes(searchTerm) ||
+            authors.includes(searchTerm) ||
+            genre.includes(searchTerm);
+
+          row.style.display = matches ? "" : "none";
+        });
+      });
     </script>
   </body>
 </html>
