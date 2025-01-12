@@ -30,8 +30,8 @@
               Edit Book
             </a>
             <button
-              onclick="deleteBook(<%= book.id %>)"
-              class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 inline-flex items-center"
+              data-book-id="<%= book.id %>"
+              class="delete-book bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 inline-flex items-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -118,6 +118,13 @@
     </main>
 
     <script>
+      document.addEventListener("click", function (e) {
+        if (e.target.closest(".delete-book")) {
+          const bookId = e.target.closest(".delete-book").dataset.bookId;
+          deleteBook(bookId);
+        }
+      });
+
       async function deleteBook(id) {
         if (confirm("Are you sure you want to delete this book?")) {
           try {
