@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Edit <%= book.title %> - Bookstore Inventory</title>
+    <link rel="stylesheet" href="/css/tailwind.css" />
+  </head>
+  <body class="bg-secondary text-gray-900">
+    <%- include('../partials/header') %> <%- include('../partials/nav') %>
+    <main class="p-4 max-w-4xl mx-auto">
+      <div class="bg-white shadow-md rounded-lg p-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold text-primary">Edit Book</h1>
+        </div>
+
+        <form id="editBookForm" class="space-y-6">
+          <!-- Book details grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left column -->
+            <div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h2 class="font-semibold text-lg mb-4">Book Details</h2>
+                <div class="space-y-4">
+                  <div>
+                    <label for="title" class="block text-gray-600 mb-1">Title</label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value="<%= book.title %>"
+                      class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label for="genre_id" class="block text-gray-600 mb-1">Genre</label>
+                    <select
+                      id="genre_id"
+                      name="genre_id"
+                      class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                      required
+                    >
+                      <% genres.forEach(genre => { %>
+                        <option value="<%= genre.id %>" <%= book.genre_id === genre.id ? 'selected' : '' %>>
+                          <%= genre.name %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="quantity" class="block text-gray-600 mb-1">Quantity in Stock</label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      name="quantity"
+                      value="<%= book.quantity %>"
+                      min="0"
+                      class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label for="authors" class="block text-gray-600 mb-1">Authors</label>
+                    <select
+                      id="author_ids"
+                      name="author_ids"
+                      multiple
+                      class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                      required
+                    >
+                      <% authors.forEach(author => { %>
+                        <option 
+                          value="<%= author.id %>"
+                          <%= book.author_ids && book.author_ids.includes(author.id) ? 'selected' : '' %>
+                        >
+                          <%= author.name %>
+                        </option>
+                      <% }) %>
+                    </select>
+                    <p class="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple authors</p>
+                  </div>
+
+                  <div>
+                    <label for="cover_image" class="block text-gray-600 mb-1">Cover Image URL</label>
+                    <input
+                      type="url"
+                      id="cover_image"
+                      name="cover_image"
+                      value="<%= book.cover_image %>"
+                      class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right column -->
+            <div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h2 class="font-semibold text-lg mb-1">Description</h2>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="8"
+                  class="w-full p-2 border rounded focus:border-accent focus:ring-1 focus:ring-accent"
+                ><%= book.description || '' %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex justify-end space-x-2">
+            <a
+              href="/books/<%= book.id %>"
+              class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(e.target);
+        const author_ids = Array.from(document.getElementById('author_ids').selectedOptions)
+          .map(option => option.value);
+        
+        // Create request body
+        const data = {
+          title: formData.get('title'),
+          genre_id: formData.get('genre_id'),
+          quantity: formData.get('quantity'),
+          description: formData.get('description'),
+          cover_image: formData.get('cover_image'),
+          author_ids
+        };
+
+        try {
+          const response = await fetch('/books/<%= book.id %>', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          });
+
+          if (response.ok) {
+            window.location.href = '/books/<%= book.id %>';
+          } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to update book');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Failed to update book');
+        }
+      });
+    </script>
+  </body>
+</html> 

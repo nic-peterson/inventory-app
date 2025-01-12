@@ -253,4 +253,42 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// Render edit book form
+router.get("/:id/edit", async (req, res) => {
+  const bookId = parseInt(req.params.id, 10);
+  try {
+    // Get book data
+    const bookResult = await db.query(
+      `
+      SELECT 
+        books.*, 
+        ARRAY_AGG(book_authors.author_id) as author_ids
+      FROM books
+      LEFT JOIN book_authors ON books.id = book_authors.book_id
+      WHERE books.id = $1
+      GROUP BY books.id
+    `,
+      [bookId]
+    );
+
+    if (bookResult.rows.length === 0) {
+      return res.render("error", { message: "Book not found." });
+    }
+
+    // Get all genres and authors for the form dropdowns
+    const genres = await db.query("SELECT * FROM genres ORDER BY name ASC");
+    const authors = await db.query("SELECT * FROM authors ORDER BY name ASC");
+
+    res.render("books/edit", {
+      book: bookResult.rows[0],
+      genres: genres.rows,
+      authors: authors.rows,
+      title: `Edit ${bookResult.rows[0].title}`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.render("error", { message: "Failed to load book data." });
+  }
+});
+
 module.exports = router;
