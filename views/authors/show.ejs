@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= author.name %> - Bookstore Inventory</title>
+    <link rel="stylesheet" href="/css/tailwind.css" />
+  </head>
+  <body class="bg-secondary text-gray-900">
+    <%- include('../partials/header') %> <%- include('../partials/nav') %>
+
+    <main class="p-4 max-w-4xl mx-auto">
+      <div class="bg-white shadow-md rounded-lg p-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold text-primary"><%= author.name %></h1>
+          <div class="space-x-2">
+            <a
+              href="/authors/<%= author.id %>/edit"
+              class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            >
+              Edit Author
+            </a>
+            <form
+              action="/authors/<%= author.id %>?_method=DELETE"
+              method="POST"
+              class="inline-block"
+              onsubmit="return confirm('Are you sure you want to delete this author?')"
+            >
+              <button
+                type="submit"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Delete Author
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Author Details -->
+        <div class="mb-8">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h2 class="font-semibold text-lg mb-2">Bio</h2>
+            <p class="text-gray-700"><%= author.bio || 'No bio available' %></p>
+          </div>
+        </div>
+
+        <!-- Author's Books -->
+        <div>
+          <h2 class="text-xl font-semibold text-primary mb-4">
+            Books by <%= author.name %>
+          </h2>
+
+          <% if (books && books.length > 0) { %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <% books.forEach(book => { %>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="flex items-start space-x-4">
+                <% if (book.cover_image) { %>
+                <img
+                  src="<%= book.cover_image %>"
+                  alt="Cover of <%= book.title %>"
+                  class="w-20 h-28 object-cover rounded"
+                />
+                <% } else { %>
+                <div
+                  class="w-20 h-28 bg-gray-200 rounded flex items-center justify-center"
+                >
+                  <span class="text-gray-400">No Cover</span>
+                </div>
+                <% } %>
+
+                <div>
+                  <h3 class="font-medium">
+                    <a
+                      href="/books/<%= book.id %>"
+                      class="text-primary hover:text-primary-dark"
+                    >
+                      <%= book.title %>
+                    </a>
+                  </h3>
+                  <p class="text-sm text-gray-600"><%= book.genre_name %></p>
+                  <p class="text-sm text-gray-600">
+                    <%= book.quantity %> in stock
+                  </p>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } else { %>
+          <p class="text-gray-600">No books found for this author.</p>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      async function deleteAuthor(authorId) {
+        if (!confirm("Are you sure you want to delete this author?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/authors/${authorId}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            window.location.href = "/authors";
+          } else {
+            const error = await response.json();
+            alert(error.message || "Failed to delete author");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Failed to delete author");
+        }
+      }
+    </script>
+  </body>
+</html>
