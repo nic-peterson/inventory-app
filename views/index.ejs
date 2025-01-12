@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <title><%= title %></title>
-    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/tailwind.css" />
   </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Use the navigation menu to manage inventory.</p>
+  <body class="bg-secondary text-gray-900">
+    <header class="bg-primary text-contrast p-4">
+      <h1 class="text-2xl"><%= title %></h1>
+    </header>
+    <%- include('partials/nav') %>
+    <main class="p-4">
+      <p>Use the navigation menu to manage inventory.</p>
+      <!-- Add navigation and other UI components here -->
+    </main>
   </body>
 </html>

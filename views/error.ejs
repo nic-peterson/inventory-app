@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Error - Bookstore Inventory</title>
+    <link rel="stylesheet" href="/css/tailwind.css" />
+  </head>
+  <body class="bg-secondary text-gray-900">
+    <%- include('partials/header') %> <%- include('partials/nav') %>
+
+    <main class="p-4">
+      <div
+        class="max-w-xl mx-auto mt-8 p-4 bg-red-50 border border-red-200 rounded"
+      >
+        <h2 class="text-xl text-red-700 mb-2">Error</h2>
+        <p class="text-red-600"><%= message %></p>
+        <a
+          href="javascript:history.back()"
+          class="mt-4 inline-block text-blue-600 hover:underline"
+        >
+          Go Back
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

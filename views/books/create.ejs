@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add New Book - Bookstore Inventory</title>
+    <link rel="stylesheet" href="/css/tailwind.css" />
+  </head>
+  <body class="bg-secondary text-gray-900">
+    <%- include('../partials/header') %> <%- include('../partials/nav') %>
+
+    <main class="p-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-6">Add New Book</h1>
+
+      <form action="/books" method="POST" class="space-y-6">
+        <!-- Book Details -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Book Details</h2>
+
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Title *</label
+              >
+              <input
+                type="text"
+                name="title"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Description</label
+              >
+              <textarea
+                name="description"
+                rows="3"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Quantity *</label
+              >
+              <input
+                type="number"
+                name="quantity"
+                required
+                min="0"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Genre Selection -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Genre</h2>
+            <button
+              type="button"
+              id="newGenreBtn"
+              class="text-accent hover:text-accent-dark"
+            >
+              + Add New Genre
+            </button>
+          </div>
+
+          <div id="genreSelection">
+            <select
+              name="genre_id"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+            >
+              <option value="">Select a genre</option>
+              <% genres.forEach(genre => { %>
+              <option value="<%= genre.id %>"><%= genre.name %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div id="newGenreForm" class="hidden mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Genre Name</label
+              >
+              <input
+                type="text"
+                id="newGenreName"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Description</label
+              >
+              <textarea
+                id="newGenreDescription"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              ></textarea>
+            </div>
+            <button
+              type="button"
+              onclick="createGenre()"
+              class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            >
+              Save Genre
+            </button>
+          </div>
+        </div>
+
+        <!-- Authors Selection -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Authors</h2>
+            <button
+              type="button"
+              id="newAuthorBtn"
+              class="text-accent hover:text-accent-dark"
+            >
+              + Add New Author
+            </button>
+          </div>
+
+          <div id="authorSelection" class="space-y-2">
+            <div class="flex flex-wrap gap-2">
+              <% authors.forEach(author => { %>
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  name="author_ids[]"
+                  value="<%= author.id %>"
+                  class="rounded border-gray-300 text-accent focus:ring-accent"
+                />
+                <span class="ml-2"><%= author.name %></span>
+              </label>
+              <% }) %>
+            </div>
+          </div>
+
+          <div id="newAuthorForm" class="hidden mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Author Name</label
+              >
+              <input
+                type="text"
+                id="newAuthorName"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Bio</label>
+              <textarea
+                id="newAuthorBio"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
+              ></textarea>
+            </div>
+            <button
+              type="button"
+              onclick="createAuthor()"
+              class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            >
+              Save Author
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+          <a
+            href="/books"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+          >
+            Cancel
+          </a>
+          <button
+            type="submit"
+            class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+          >
+            Create Book
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <script>
+      // Toggle new genre form
+      document.getElementById("newGenreBtn").addEventListener("click", () => {
+        document.getElementById("newGenreForm").classList.toggle("hidden");
+      });
+
+      // Toggle new author form
+      document.getElementById("newAuthorBtn").addEventListener("click", () => {
+        document.getElementById("newAuthorForm").classList.toggle("hidden");
+      });
+
+      // Create new genre
+      async function createGenre() {
+        const name = document.getElementById("newGenreName").value;
+        const description = document.getElementById(
+          "newGenreDescription"
+        ).value;
+
+        try {
+          const response = await fetch("/genres", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, description }),
+          });
+
+          if (!response.ok) throw new Error("Failed to create genre");
+
+          const genre = await response.json();
+
+          // Add new genre to select options
+          const select = document.querySelector('select[name="genre_id"]');
+          const option = new Option(genre.name, genre.id);
+          select.add(option);
+          select.value = genre.id;
+
+          // Hide the form and reset fields
+          document.getElementById("newGenreForm").classList.add("hidden");
+          document.getElementById("newGenreName").value = "";
+          document.getElementById("newGenreDescription").value = "";
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Failed to create genre");
+        }
+      }
+
+      // Create new author
+      async function createAuthor() {
+        const name = document.getElementById("newAuthorName").value;
+        const bio = document.getElementById("newAuthorBio").value;
+
+        try {
+          const response = await fetch("/authors", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, bio }),
+          });
+
+          if (!response.ok) throw new Error("Failed to create author");
+
+          const author = await response.json();
+
+          // Add new author to checkboxes
+          const container = document.querySelector("#authorSelection .flex");
+          const label = document.createElement("label");
+          label.className = "inline-flex items-center";
+          label.innerHTML = `
+            <input 
+              type="checkbox" 
+              name="author_ids[]" 
+              value="${author.author_id}"
+              checked
+              class="rounded border-gray-300 text-accent focus:ring-accent"
+            >
+            <span class="ml-2">${name}</span>
+          `;
+          container.appendChild(label);
+
+          // Hide the form and reset fields
+          document.getElementById("newAuthorForm").classList.add("hidden");
+          document.getElementById("newAuthorName").value = "";
+          document.getElementById("newAuthorBio").value = "";
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Failed to create author");
+        }
+      }
+    </script>
+  </body>
+</html>
