@@ -10,6 +10,7 @@
     <main class="p-4">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-bold">Books</h2>
+
         <a
           href="/books/add"
           class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark inline-flex items-center"
@@ -65,6 +66,12 @@
                 class="text-green-600 hover:underline"
                 >Edit</a
               >
+              <button
+                onclick="deleteBook(<%= book.id %>)"
+                class="text-red-600 hover:underline cursor-pointer"
+              >
+                Delete
+              </button>
             </td>
           </tr>
           <% }) %>
