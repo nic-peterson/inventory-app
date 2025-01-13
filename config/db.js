@@ -11,6 +11,8 @@ try {
           require: true,
           rejectUnauthorized: false,
         },
+        // Force IPv4
+        family: 4,
       }
     : {
         user: process.env.DB_USER || "nicpeterson",
@@ -19,6 +21,11 @@ try {
         password: process.env.DB_PASSWORD,
         port: parseInt(process.env.DB_PORT || "5432"),
       };
+
+  console.log("Attempting to connect to database...");
+  if (process.env.DATABASE_URL) {
+    console.log("Using DATABASE_URL connection");
+  }
 
   pool = new Pool(config);
 
