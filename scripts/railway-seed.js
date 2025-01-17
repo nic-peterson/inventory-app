@@ -5,7 +5,7 @@ const path = require("path"); // For handling file paths
 
 // 1. Create a new pool using the DATABASE_URL (Railway sets this in the environment)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_PUBLIC_URL,
   // If you're on Railway, you usually need SSL in production:
   ssl:
     process.env.NODE_ENV === "production"
