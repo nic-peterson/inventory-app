@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install --omit=dev && npm run build:css"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "on_failure" 
