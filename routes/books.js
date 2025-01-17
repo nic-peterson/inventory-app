@@ -18,13 +18,26 @@ router.get("/", async (req, res) => {
       GROUP BY books.id, genres.name
       ORDER BY books.title ASC
     `);
+
+    // If it's an API request, return JSON
+    if (req.headers.accept?.includes("application/json")) {
+      return res.json(result.rows);
+    }
+
+    // Otherwise render the view
     res.render("books/index", {
       books: result.rows,
       title: "Books Inventory",
     });
   } catch (error) {
     console.error(error);
-    res.render("error", { message: "Failed to retrieve books." });
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(500).json({ message: "Failed to retrieve books." });
+    }
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to retrieve books.",
+    });
   }
 });
 
@@ -43,7 +56,10 @@ router.get("/add", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.render("error", { message: "Failed to load form data." });
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to load form data.",
+    });
   }
 });
 
@@ -67,7 +83,7 @@ router.post("/", validateBook, async (req, res) => {
 
     // Create book
     const bookResult = await client.query(
-      "INSERT INTO books (title, genre_id, quantity, description, cover_image) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      "INSERT INTO books (title, genre_id, quantity, description, cover_image) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [title, genre_id, quantity, description, cover_image]
     );
 
@@ -89,17 +105,31 @@ router.post("/", validateBook, async (req, res) => {
 
     await client.query("COMMIT");
 
+    // Return response based on request type
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(201).json({
+        message: "Book created successfully",
+        book: bookResult.rows[0],
+      });
+    }
+
     // Redirect to books list after successful creation
     res.redirect("/books");
   } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
 
+    if (req.headers.accept?.includes("application/json")) {
+      return res
+        .status(500)
+        .json({ message: error.message || "Failed to create book." });
+    }
+
     // Reload the form with error message
     const genres = await db.query("SELECT * FROM genres ORDER BY name ASC");
     const authors = await db.query("SELECT * FROM authors ORDER BY name ASC");
 
-    res.render("books/create", {
+    res.status(500).render("books/create", {
       genres: genres.rows,
       authors: authors.rows,
       error: error.message,
@@ -132,7 +162,17 @@ router.get("/:id", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.render("error", { message: "Book not found." });
+      if (req.headers.accept?.includes("application/json")) {
+        return res.status(404).json({ message: "Book not found." });
+      }
+      return res.status(404).render("error", {
+        title: "Error",
+        message: "Book not found.",
+      });
+    }
+
+    if (req.headers.accept?.includes("application/json")) {
+      return res.json(result.rows[0]);
     }
 
     res.render("books/show", {
@@ -141,34 +181,56 @@ router.get("/:id", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.render("error", { message: "Failed to retrieve book." });
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(500).json({ message: "Failed to retrieve book." });
+    }
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to retrieve book.",
+    });
   }
 });
 
 // Update an existing book
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateBook, async (req, res) => {
   const bookId = parseInt(req.params.id, 10);
   const { title, genre_id, quantity, description, cover_image, author_ids } =
     req.body;
+  const client = await db.getClient();
+
   try {
+    await client.query("BEGIN");
+
+    // Check if book exists
+    const existingBook = await client.query(
+      "SELECT id FROM books WHERE id = $1",
+      [bookId]
+    );
+
+    if (existingBook.rows.length === 0) {
+      if (req.headers.accept?.includes("application/json")) {
+        return res.status(404).json({ message: "Book not found." });
+      }
+      return res.status(404).render("error", {
+        title: "Error",
+        message: "Book not found.",
+      });
+    }
+
     // Update the book
-    const bookResult = await db.query(
+    const bookResult = await client.query(
       "UPDATE books SET title = $1, genre_id = $2, quantity = $3, description = $4, cover_image = $5 WHERE id = $6 RETURNING *",
       [title, genre_id, quantity, description, cover_image, bookId]
     );
 
-    if (bookResult.rows.length === 0) {
-      return res.status(404).json({ message: "Book not found." });
-    }
-
     // Update book_authors
     // First, delete existing associations
-    await db.query("DELETE FROM book_authors WHERE book_id = $1", [bookId]);
+    await client.query("DELETE FROM book_authors WHERE book_id = $1", [bookId]);
 
     // Insert new associations
     if (author_ids && Array.isArray(author_ids)) {
       const insertPromises = author_ids.map((authorId) => {
-        return db.query(
+        return client.query(
           "INSERT INTO book_authors (book_id, author_id) VALUES ($1, $2)",
           [bookId, authorId]
         );
@@ -176,28 +238,80 @@ router.put("/:id", async (req, res) => {
       await Promise.all(insertPromises);
     }
 
-    res.json({ message: "Book updated successfully." });
+    await client.query("COMMIT");
+
+    if (req.headers.accept?.includes("application/json")) {
+      return res.json({
+        message: "Book updated successfully",
+        book: bookResult.rows[0],
+      });
+    }
+
+    res.redirect(`/books/${bookId}`);
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error(error);
-    res.status(500).json({ message: "Failed to update book." });
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(500).json({ message: "Failed to update book." });
+    }
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to update book.",
+    });
+  } finally {
+    client.release();
   }
 });
 
 // Delete a book
 router.delete("/:id", async (req, res) => {
   const bookId = parseInt(req.params.id, 10);
+  const client = await db.getClient();
+
   try {
-    const result = await db.query(
-      "DELETE FROM books WHERE id = $1 RETURNING *",
+    await client.query("BEGIN");
+
+    // Check if book exists
+    const existingBook = await client.query(
+      "SELECT id FROM books WHERE id = $1",
       [bookId]
     );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Book not found." });
+
+    if (existingBook.rows.length === 0) {
+      if (req.headers.accept?.includes("application/json")) {
+        return res.status(404).json({ message: "Book not found." });
+      }
+      return res.status(404).render("error", {
+        title: "Error",
+        message: "Book not found.",
+      });
     }
-    res.json({ message: "Book deleted successfully." });
+
+    // Delete book_authors associations first
+    await client.query("DELETE FROM book_authors WHERE book_id = $1", [bookId]);
+
+    // Delete the book
+    await client.query("DELETE FROM books WHERE id = $1", [bookId]);
+
+    await client.query("COMMIT");
+
+    if (req.headers.accept?.includes("application/json")) {
+      return res.json({ message: "Book deleted successfully." });
+    }
+
+    res.redirect("/books");
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error(error);
-    res.status(500).json({ message: "Failed to delete book." });
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(500).json({ message: "Failed to delete book." });
+    }
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to delete book.",
+    });
+  } finally {
+    client.release();
   }
 });
 
@@ -246,10 +360,24 @@ router.get("/search", async (req, res) => {
     query += ` GROUP BY books.id, genres.name ORDER BY books.title ASC`;
 
     const result = await db.query(query, params);
-    res.json(result.rows);
+
+    if (req.headers.accept?.includes("application/json")) {
+      return res.json(result.rows);
+    }
+
+    res.render("books/index", {
+      title: "Search Results",
+      books: result.rows,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to search books" });
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(500).json({ message: "Failed to search books" });
+    }
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to search books.",
+    });
   }
 });
 
@@ -272,7 +400,10 @@ router.get("/:id/edit", async (req, res) => {
     );
 
     if (bookResult.rows.length === 0) {
-      return res.render("error", { message: "Book not found." });
+      return res.status(404).render("error", {
+        title: "Error",
+        message: "Book not found.",
+      });
     }
 
     // Get all genres and authors for the form dropdowns
@@ -287,7 +418,10 @@ router.get("/:id/edit", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.render("error", { message: "Failed to load book data." });
+    res.status(500).render("error", {
+      title: "Error",
+      message: "Failed to load book data.",
+    });
   }
 });
 

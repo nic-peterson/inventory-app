@@ -95,7 +95,8 @@
             if (response.ok) {
               window.location.reload();
             } else {
-              alert("Failed to delete book");
+              const error = await response.json();
+              alert(error.message || "Failed to delete book");
             }
           } catch (error) {
             console.error("Error:", error);
