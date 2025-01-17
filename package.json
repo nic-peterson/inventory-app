@@ -7,7 +7,11 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "migrate": "psql -d inventory_db -f migrations/init.sql",
-    "build:css": "tailwindcss -i ./public/css/styles.css -o ./public/css/tailwind.css --watch"
+    "build:css": "tailwindcss -i ./public/css/styles.css -o ./public/css/tailwind.css --watch",
+    "seed": "node scripts/railway-seed.js",
+    "init-railway-db": "node scripts/init-railway-db.js",
+    "init-railway-db:shell": "./scripts/init-railway-db.sh",
+    "init-railway-db:restore": "./scripts/init-railway-db-restore.sh"
   },
   "keywords": [],
   "author": "",
