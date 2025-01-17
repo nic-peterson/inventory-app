@@ -2,17 +2,150 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/tailwind.css" />
   </head>
   <body class="bg-secondary text-gray-900">
-    <header class="bg-primary text-contrast p-4">
-      <h1 class="text-2xl"><%= title %></h1>
-    </header>
-    <%- include('partials/nav') %>
-    <main class="p-4">
-      <p>Use the navigation menu to manage inventory.</p>
-      <!-- Add navigation and other UI components here -->
+    <%- include('partials/header') %> <%- include('partials/nav') %>
+
+    <main class="p-4 max-w-7xl mx-auto">
+      <div class="bg-white shadow-md rounded-lg p-4 md:p-6 mb-6">
+        <h1 class="text-2xl font-bold text-primary mb-4">
+          Welcome to Bookstore Inventory
+        </h1>
+        <p class="text-gray-600 mb-6">
+          Manage your bookstore's inventory efficiently with our easy-to-use
+          system.
+        </p>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2 text-gray-600">Books</h3>
+            <p class="text-3xl font-bold text-primary"><%= bookCount %></p>
+            <p class="text-sm text-gray-500 mt-1">Total in inventory</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2 text-gray-600">Authors</h3>
+            <p class="text-3xl font-bold text-primary"><%= authorCount %></p>
+            <p class="text-sm text-gray-500 mt-1">Registered authors</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold mb-2 text-gray-600">Genres</h3>
+            <p class="text-3xl font-bold text-primary"><%= genreCount %></p>
+            <p class="text-sm text-gray-500 mt-1">Available categories</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a href="/books/add" class="block">
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-accent bg-opacity-10 rounded-full p-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-accent"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Add New Book</h3>
+                  <p class="text-sm text-gray-600">
+                    Add a new book to inventory
+                  </p>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <a href="/authors/new" class="block">
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-accent bg-opacity-10 rounded-full p-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-accent"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Add New Author</h3>
+                  <p class="text-sm text-gray-600">Add a new author profile</p>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <a href="/genres/new" class="block">
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="bg-accent bg-opacity-10 rounded-full p-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-accent"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold">Add New Genre</h3>
+                  <p class="text-sm text-gray-600">Create a new book genre</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Recent Activity or Help Section -->
+      <div class="bg-white shadow-md rounded-lg p-4 md:p-6">
+        <h2 class="text-xl font-semibold mb-4">Getting Started</h2>
+        <div class="prose max-w-none">
+          <ul class="space-y-2 text-gray-600">
+            <li>Add books to your inventory using the "Add New Book" button</li>
+            <li>Manage authors and their information in the Authors section</li>
+            <li>Organize books by genres in the Genres section</li>
+            <li>
+              Use the search feature to quickly find books, authors, or genres
+            </li>
+          </ul>
+        </div>
+      </div>
     </main>
   </body>
 </html>
