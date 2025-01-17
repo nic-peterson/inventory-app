@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Genres - Bookstore Inventory</title>
     <link rel="stylesheet" href="/css/tailwind.css" />
   </head>
@@ -9,20 +10,32 @@
     <%- include('../partials/header') %> <%- include('../partials/nav') %>
 
     <main class="p-4 max-w-4xl mx-auto">
-      <div class="bg-white shadow-md rounded-lg p-6">
+      <div class="bg-white shadow-md rounded-lg p-4 md:p-6">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0"
+        >
           <h1 class="text-2xl font-bold text-primary">Genres</h1>
           <a
             href="/genres/new"
-            class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark"
+            class="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark w-full sm:w-auto text-center"
           >
             Add New Genre
           </a>
         </div>
 
-        <!-- Genres Table -->
-        <div class="overflow-x-auto">
+        <!-- Search Input -->
+        <div class="mb-6">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search genres..."
+            class="w-full p-2 border rounded focus:ring-1 focus:ring-accent focus:border-accent"
+          />
+        </div>
+
+        <!-- Desktop Genres Table -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -48,7 +61,10 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody
+              class="bg-white divide-y divide-gray-200"
+              id="genresTableBody"
+            >
               <% genres.forEach(genre => { %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -62,45 +78,114 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500">
+                  <div class="text-sm text-gray-900">
                     <%= genre.book_count || 0 %> books
                   </div>
                 </td>
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                >
-                  <div class="flex justify-end space-x-2">
-                    <a
-                      href="/genres/<%= genre.id %>"
-                      class="text-primary hover:text-primary-dark"
-                      >View</a
+                <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
+                  <a
+                    href="/genres/<%= genre.id %>"
+                    class="text-blue-600 hover:text-blue-900"
+                    >View</a
+                  >
+                  <a
+                    href="/genres/<%= genre.id %>/edit"
+                    class="text-green-600 hover:text-green-900"
+                    >Edit</a
+                  >
+                  <form
+                    action="/genres/<%= genre.id %>?_method=DELETE"
+                    method="POST"
+                    class="inline-block"
+                    onsubmit="return confirm('Are you sure you want to delete this genre?')"
+                  >
+                    <button
+                      type="submit"
+                      class="text-red-600 hover:text-red-900"
                     >
-                    <a
-                      href="/genres/<%= genre.id %>/edit"
-                      class="text-accent hover:text-accent-dark"
-                      >Edit</a
-                    >
-                    <form
-                      action="/genres/<%= genre.id %>?_method=DELETE"
-                      method="POST"
-                      class="inline"
-                      onsubmit="return confirm('Are you sure you want to delete this genre?')"
-                    >
-                      <button
-                        type="submit"
-                        class="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </form>
-                  </div>
+                      Delete
+                    </button>
+                  </form>
                 </td>
               </tr>
               <% }) %>
             </tbody>
           </table>
         </div>
+
+        <!-- Mobile Genres Cards -->
+        <div class="md:hidden space-y-4">
+          <% genres.forEach(genre => { %>
+          <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+              <h3 class="text-lg font-medium text-gray-900">
+                <%= genre.name %>
+              </h3>
+              <span class="text-sm text-gray-500">
+                <%= genre.book_count || 0 %> books
+              </span>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">
+              <%= genre.description || 'No description available' %>
+            </p>
+            <div class="flex justify-end space-x-3 text-sm">
+              <a
+                href="/genres/<%= genre.id %>"
+                class="text-blue-600 hover:text-blue-900"
+                >View</a
+              >
+              <a
+                href="/genres/<%= genre.id %>/edit"
+                class="text-green-600 hover:text-green-900"
+                >Edit</a
+              >
+              <form
+                action="/genres/<%= genre.id %>?_method=DELETE"
+                method="POST"
+                class="inline-block"
+                onsubmit="return confirm('Are you sure you want to delete this genre?')"
+              >
+                <button type="submit" class="text-red-600 hover:text-red-900">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+          <% }) %>
+        </div>
       </div>
     </main>
+
+    <script>
+      // Add search functionality
+      const searchInput = document.getElementById("searchInput");
+      const tableBody = document.getElementById("genresTableBody");
+      const mobileCards = document.querySelector(".md\\:hidden");
+      const cards = mobileCards.children;
+
+      searchInput.addEventListener("input", function () {
+        const searchTerm = this.value.toLowerCase();
+
+        // Desktop view
+        if (tableBody) {
+          const rows = tableBody.getElementsByTagName("tr");
+          Array.from(rows).forEach((row) => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const description = row.cells[1].textContent.toLowerCase();
+
+            const matches =
+              name.includes(searchTerm) || description.includes(searchTerm);
+
+            row.style.display = matches ? "" : "none";
+          });
+        }
+
+        // Mobile view
+        Array.from(cards).forEach((card) => {
+          const content = card.textContent.toLowerCase();
+          card.style.display = content.includes(searchTerm) ? "" : "none";
+        });
+      });
+    </script>
   </body>
 </html>

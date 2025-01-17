@@ -1,18 +1,52 @@
 <nav class="bg-white shadow-md">
   <div class="container mx-auto px-4">
-    <ul class="flex space-x-6 py-3">
+    <!-- Mobile menu button -->
+    <div class="flex items-center justify-between md:hidden py-3">
+      <a href="/" class="text-primary font-bold">Inventory</a>
+      <button id="menuButton" class="text-gray-600 hover:text-gray-900">
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <ul
+      id="menuItems"
+      class="hidden md:flex md:space-x-6 py-3 flex-col md:flex-row space-y-2 md:space-y-0"
+    >
       <li>
-        <a href="/" class="hover:text-accent">Home</a>
+        <a href="/" class="hover:text-accent block">Home</a>
       </li>
       <li>
-        <a href="/books" class="hover:text-accent">Books</a>
+        <a href="/books" class="hover:text-accent block">Books</a>
       </li>
       <li>
-        <a href="/authors" class="hover:text-accent">Authors</a>
+        <a href="/authors" class="hover:text-accent block">Authors</a>
       </li>
       <li>
-        <a href="/genres" class="hover:text-accent">Genres</a>
+        <a href="/genres" class="hover:text-accent block">Genres</a>
       </li>
     </ul>
   </div>
+
+  <!-- Mobile menu toggle script -->
+  <script>
+    const menuButton = document.getElementById("menuButton");
+    const menuItems = document.getElementById("menuItems");
+
+    menuButton.addEventListener("click", () => {
+      menuItems.classList.toggle("hidden");
+    });
+  </script>
 </nav>
